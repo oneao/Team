@@ -1,13 +1,13 @@
 import { createApp } from 'vue'
 
 import Cookies from 'js-cookie'
+import '@/assets/styles/tailwind.css' //
 
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import locale from 'element-plus/es/locale/lang/zh-cn'
 
 import '@/assets/styles/index.scss' // global css
-
 import App from './App'
 import store from './store'
 import router from './router'

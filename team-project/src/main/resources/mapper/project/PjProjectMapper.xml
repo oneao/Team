@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.oneao.project.mapper.PjProjectMapper">
+    <update id="recovery">
+        update pj_project set is_delete = 0,update_time = now()
+        where id in
+        <foreach collection="ids" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </update>
+    <delete id="realDelete">
+        delete from pj_project
+        where id in
+        <foreach collection="ids" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="selectCountByName" resultType="java.lang.Integer">
+        select count(1) from pj_project where name = #{name} and is_delete = 1
+    </select>
+    <select id="selectPjProjectListByUserId" resultType="cn.oneao.project.domain.PjProject">
+        select pj_project.*
+        from pj_user
+        join pj_project on pj_user.pj_project_id = pj_project.id
+        where pj_user.user_id = #{userId} and pj_project.is_delete = 0
+    </select>
+    <select id="selectSysUserListByProjectId" resultType="cn.oneao.common.core.domain.entity.SysUser">
+        select sys_user.*
+        from pj_project
+        join pj_user on pj_project.id = pj_user.pj_project_id
+        join sys_user on pj_user.user_id = sys_user.user_id
+        where pj_project.id = #{projectId}
+    </select>
+    <select id="getRecycleList" resultType="cn.oneao.project.domain.PjProject">
+        select * from pj_project where is_delete = 1
+        <if test="name != null and name != ''">
+            and name like concat('%', #{name}, '%')
+        </if>
+        <if test="startTime != null ">
+            and update_time &gt;= #{startTime}
+        </if>
+        <if test="endTime != null ">
+            and update_time &lt;= #{endTime}
+        </if>
+        limit #{start},#{end}
+    </select>
+    <select id="getRecycleListCount" resultType="java.lang.Long">
+        select count(1) from pj_project where is_delete = 1
+        <if test="name != null and name != ''">
+            and name like concat('%', #{name}, '%')
+        </if>
+        <if test="startTime != null ">
+            and update_time &gt;= #{startTime}
+        </if>
+        <if test="endTime != null">
+            and update_time &lt;= #{endTime}
+        </if>
+    </select>
+    <select id="selectDeleteProject" resultType="cn.oneao.project.domain.PjProject">
+        select * from pj_project where id in
+        <foreach collection="idList" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+        and is_delete = 1
+    </select>
+    <select id="selectPjProjectByTaskId" resultType="cn.oneao.project.domain.PjProject">
+        select pj_project.*
+        from pj_task
+        join pj_task_stages on pj_task.pj_task_stages_id = pj_task_stages.id
+        join pj_project on pj_task_stages.pj_project_id = pj_project.id
+        where pj_task.id = #{taskId}
+    </select>
+
+</mapper>

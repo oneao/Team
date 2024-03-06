@@ -91,4 +91,8 @@ public class HttpStatus
      * 系统警告消息
      */
     public static final int WARN = 601;
+    // 项目用户不存在
+    public static final int PROJECT_USER_NOT_IN = 602;
+    // 项目用户状态异常
+    public static final int PROJECT_USER_STATUS = 603;
 }

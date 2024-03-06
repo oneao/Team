@@ -1,6 +1,7 @@
 import axios from 'axios'
 import { ElNotification , ElMessageBox, ElMessage, ElLoading } from 'element-plus'
 import { getToken } from '@/utils/auth'
+import {getProjectToken} from "@/utils/projectAuth.js";
 import errorCode from '@/utils/errorCode'
 import { tansParams, blobValidate } from '@/utils/ruoyi'
 import cache from '@/plugins/cache'
@@ -28,6 +29,9 @@ service.interceptors.request.use(config => {
   const isRepeatSubmit = (config.headers || {}).repeatSubmit === false
   if (getToken() && !isToken) {
     config.headers['Authorization'] = 'Bearer ' + getToken() // 让每个请求携带自定义token 请根据实际情况自行修改
+  }
+  if (config.url.startsWith('/project/task')){
+    config.headers['Project-Id'] = getProjectToken(); // 设置另一个请求头
   }
   // get请求映射params参数
   if (config.method === 'get' && config.params) {
@@ -100,6 +104,9 @@ service.interceptors.response.use(res => {
     } else if (code === 601) {
       ElMessage({ message: msg, type: 'warning' })
       return Promise.reject(new Error(msg))
+    }else if(code === 602 || code === 603) {
+        ElMessage({ message: msg, type: 'warning' })
+        return Promise.reject(new Error(msg))
     } else if (code !== 200) {
       ElNotification.error({ title: msg })
       return Promise.reject('error')

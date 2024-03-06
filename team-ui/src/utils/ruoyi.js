@@ -46,6 +46,59 @@ export function parseTime(time, pattern) {
   return time_str
 }
 
+//js函数代码：字符串转换为时间戳
+function getDateTimeStamp(dateStr){
+  return Date.parse(dateStr.replace(/-/gi,"/"));
+}
+//JavaScript函数：
+export function getDateDiff(dateTimeStamp) {
+  dateTimeStamp = getDateTimeStamp(dateTimeStamp);
+  var minute = 1000 * 60;
+  var hour = minute * 60;
+  var day = hour * 24;
+  var halfamonth = day * 15;
+  var month = day * 30;
+
+  var now = new Date().getTime();
+  var diffValue = now - dateTimeStamp;
+  if (diffValue < 0) {
+    //若日期不符则弹出窗口告之
+    //alert("结束日期不能小于开始日期！");
+  }
+  var result = ''
+  var monthC = diffValue / month;
+  var weekC = diffValue / (7 * day);
+  var dayC = diffValue / day;
+  var hourC = diffValue / hour;
+  var minC = diffValue / minute;
+  if (monthC >= 1) {
+    result =  '';
+  } else if (weekC >= 1) {
+    result = '';
+  } else if (dayC >= 1) {
+    result = '';
+  } else if (hourC >= 1) {
+    result =  parseInt(hourC) + " hours ago"
+  } else if (minC >= 1) {
+    result = parseInt(minC) + " minutes ago";
+  } else
+    result = "刚刚发表";
+  return result;
+}
+
+export function formatDateToEnglish(dateString) {
+  // 创建一个新的 Date 对象
+  const date = new Date(dateString);
+
+  // 获取月份和日期
+  const month = date.toLocaleString('en', { month: 'long' }); // 获取英文月份名
+  const day = date.getDate(); // 获取日期
+
+  // 格式化成英文样式的几月几日
+  const formattedDate = `${month} ${day}`;
+
+  return formattedDate;
+}
 // 表单重置
 export function resetForm(refName) {
   if (this.$refs[refName]) {

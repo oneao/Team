@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.oneao.project.mapper.PjUserMapper">
+
+    <select id="getUserListByProjectId" resultType="cn.oneao.project.domain.vo.user.PjUserVO">
+        SELECT
+        u.user_id as userId,
+        u.nick_name as nickName,
+        u.email as email,
+        u.phonenumber as phoneNumber,
+        u.sex as sex,
+        GROUP_CONCAT(sys_post.post_name SEPARATOR ',') AS postName,
+        pj_user.create_by AS createBy,
+        u.status as accountStatus,
+        pj_user.status as projectStatus,
+        CASE
+        WHEN pj_user.user_id IS NOT NULL THEN 1
+        ELSE 0
+        END AS isInProject
+        FROM
+        sys_user u
+        LEFT JOIN sys_dept d ON u.dept_id = d.dept_id
+        INNER JOIN sys_user_post ON u.user_id = sys_user_post.user_id
+        INNER JOIN sys_post ON sys_user_post.post_id = sys_post.post_id
+        LEFT JOIN pj_user ON u.user_id = pj_user.user_id AND pj_user.pj_project_id = #{projectId}
+        WHERE
+        u.del_flag = '0'
+        <if test="deptId != null and deptId != 0">
+            AND (u.dept_id = #{deptId} OR u.dept_id IN ( SELECT t.dept_id FROM sys_dept t WHERE find_in_set(#{deptId}, ancestors) ))
+        </if>
+        <if test="nickName != null and nickName != ''">
+            AND u.nick_name LIKE CONCAT('%', #{nickName}, '%')
+        </if>
+        <if test="postId != null and postId != ''">
+            AND sys_user_post.post_id = #{postId}
+        </if>
+        <if test="inProject != null and inProject != '' and inProject != -1">
+            AND (
+            (#{inProject} = 1 AND pj_user.status IS NOT NULL)
+            OR (#{inProject} = 2 AND pj_user.status IS NULL)
+            )
+        </if>
+        GROUP BY
+        userId,
+        nickName,
+        email,
+        phoneNumber,
+        sex,
+        accountStatus,
+        createBy,
+        projectStatus
+        LIMIT #{pNum}, #{pSize};
+    </select>
+    <select id="getUserListByProjectIdTotal" resultType="java.lang.Long">
+        select count(1) from (
+        SELECT
+        u.user_id as userId,
+        u.nick_name as nickName,
+        u.email as email,
+        u.phonenumber as phoneNumber,
+        u.sex as sex,
+        GROUP_CONCAT(sys_post.post_name SEPARATOR ',') AS postName,
+        pj_user.create_by AS createBy,
+        u.status as accountStatus,
+        pj_user.status as projectStatus,
+        CASE
+        WHEN pj_user.user_id IS NOT NULL THEN 1
+        ELSE 0
+        END AS isInProject
+        FROM
+        sys_user u
+        LEFT JOIN sys_dept d ON u.dept_id = d.dept_id
+        INNER JOIN sys_user_post ON u.user_id = sys_user_post.user_id
+        INNER JOIN sys_post ON sys_user_post.post_id = sys_post.post_id
+        LEFT JOIN pj_user ON u.user_id = pj_user.user_id AND pj_user.pj_project_id = #{projectId}
+        WHERE
+        u.del_flag = '0'
+            <if test="deptId != null and deptId != 0">AND (u.dept_id = #{deptId} OR u.dept_id IN ( SELECT t.dept_id FROM sys_dept t WHERE find_in_set(#{deptId},
+                ancestors) ))
+            </if>
+        <if test="
+        nickName != null and nickName != ''">AND u.nick_name LIKE CONCAT('%', #{nickName}, '%')
+            </if>
+            <if test="postId != null and postId != ''">
+                AND sys_user_post.post_id = #{postId}
+            </if>
+            <if test="inProject != null and inProject != '' and inProject != -1">
+                AND (
+                (#{inProject} = 1 AND pj_user.status IS NOT NULL)
+                OR (#{inProject} = 2 AND pj_user.status IS NULL)
+                )
+            </if>
+            GROUP BY
+            userId,
+            nickName,
+            email,
+            phoneNumber,
+            sex,
+            accountStatus,
+            createBy,
+            projectStatus
+        ) as total
+    </select>
+    <delete id="realDeleteByProjectIds">
+        delete from pj_user
+        where pj_project_id in
+        <foreach collection="ids" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </delete>
+
+</mapper>

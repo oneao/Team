@@ -90,7 +90,7 @@ const options = ref({
       ["link", "image", "video"]                      // 链接、图片、视频
     ],
   },
-  placeholder: "请输入内容",
+  placeholder: "",
   readOnly: props.readOnly
 });
 

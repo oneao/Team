@@ -66,7 +66,7 @@ export const constantRoutes = [
         path: '/index',
         component: () => import('@/views/index'),
         name: 'Index',
-        meta: { title: '首页', icon: 'dashboard', affix: true }
+        meta: { title: '控制台', icon: 'dashboard', affix: true }
       }
     ]
   },
@@ -83,7 +83,7 @@ export const constantRoutes = [
         meta: { title: '个人中心', icon: 'user' }
       }
     ]
-  }
+  },
 ]
 
 // 动态路由，基于用户权限动态去加载

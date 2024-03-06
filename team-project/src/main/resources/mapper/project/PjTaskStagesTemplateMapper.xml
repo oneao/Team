@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.oneao.project.mapper.PjTaskStagesTemplateMapper">
+
+    <delete id="deleteBatchByPjTemplateIds" parameterType="java.util.List">
+        DELETE FROM pj_task_stages_template
+        WHERE pj_template_id IN
+        <foreach collection="list" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </delete>
+
+</mapper>

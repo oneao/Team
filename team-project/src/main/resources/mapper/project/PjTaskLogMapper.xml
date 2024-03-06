@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.oneao.project.mapper.PjTaskLogMapper">
+    <select id="selectIndexLog" resultType="cn.oneao.project.domain.vo.project.ProjectIndexLogVO">
+        <if test="projectIdList != null and projectIdList.size() > 0">
+            select 0 as isTask,ppl.operation_type as operationType, ppl.type as type,ppl.content as
+            content,ppl.create_by as createBy,ppl.create_time as createTime,su.avatar as avatar,pp.name as name
+            from pj_project as pp
+            join pj_project_log as ppl on ppl.pj_project_id = pp.id
+            join sys_user as su on su.user_name = ppl.create_by
+            where pp.id in
+            <foreach collection="projectIdList" item="projectId" open="(" close=")" separator=",">
+                #{projectId}
+            </foreach>
+            and ppl.type in (5,6) and ppl.operation_type not in (2,3)
+        </if>
+        <if test="projectIdList != null and projectIdList.size() > 0 and taskIdList != null and taskIdList.size() > 0">
+            union all
+        </if>
+        <if test="taskIdList != null and taskIdList.size() > 0 ">
+            select 1 as isTask,ptl.operation_type as operationType, ptl.type as type,ptl.content as
+            content,ptl.create_by as createBy,ptl.create_time as createTime,su.avatar as avatar,pt.name as name
+            from pj_task as pt
+            join pj_task_log as ptl on ptl.pj_task_id = pt.id
+            join sys_user as su on su.user_name = ptl.create_by
+            where pt.id in
+            <foreach collection="taskIdList" item="taskId" open="(" close=")" separator=",">
+                #{taskId}
+            </foreach>
+            and ptl.type not in (0,3) and ptl.operation_type not in (3)
+        </if>
+    </select>
+
+</mapper>

@@ -1,5 +1,7 @@
 package cn.oneao.framework.config;
 
+import cn.oneao.framework.security.filter.ProjectAuthenticationFilter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
@@ -26,6 +28,7 @@ import cn.oneao.framework.security.handle.LogoutSuccessHandlerImpl;
  * @author ruoyi
  */
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true)
+@Slf4j
 public class SecurityConfig extends WebSecurityConfigurerAdapter
 {
     /**
@@ -51,13 +54,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
      */
     @Autowired
     private JwtAuthenticationTokenFilter authenticationTokenFilter;
-    
     /**
      * 跨域过滤器
      */
     @Autowired
     private CorsFilter corsFilter;
 
+    @Autowired
+    private ProjectAuthenticationFilter projectAuthenticationFilter;
     /**
      * 允许匿名访问的地址
      */
@@ -98,7 +102,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
         // 注解标记允许匿名访问的url
         ExpressionUrlAuthorizationConfigurer<HttpSecurity>.ExpressionInterceptUrlRegistry registry = httpSecurity.authorizeRequests();
         permitAllUrl.getUrls().forEach(url -> registry.antMatchers(url).permitAll());
-
         httpSecurity
                 // CSRF禁用，因为不使用session
                 .csrf().disable()
@@ -126,6 +129,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
         // 添加CORS filter
         httpSecurity.addFilterBefore(corsFilter, JwtAuthenticationTokenFilter.class);
         httpSecurity.addFilterBefore(corsFilter, LogoutFilter.class);
+        httpSecurity.addFilterBefore(projectAuthenticationFilter, JwtAuthenticationTokenFilter.class);
     }
 
     /**

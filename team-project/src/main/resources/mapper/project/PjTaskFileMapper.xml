@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.oneao.project.mapper.PjTaskFileMapper">
+    <update id="recoverFile">
+        update pj_task_file
+        set is_delete = 0
+        where id = #{id};
+    </update>
+
+    <delete id="deleteFileByTaskId">
+        delete
+        from pj_task_file
+        where pj_task_id = #{id}
+    </delete>
+    <delete id="deleteFileByFileid">
+        delete
+        from pj_task_file
+        where id = #{id}
+    </delete>
+    <delete id="realDeleteByTaskIds">
+        delete from pj_task_file where pj_task_id in
+        <foreach collection="taskIds" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </delete>
+
+    <select id="getByTaskFileById" resultType="cn.oneao.project.domain.PjTaskFile">
+        select *
+        from pj_task_file
+        where id = #{id}
+          and is_delete = 1;
+    </select>
+
+    <select id="getListByProjectId" resultType="cn.oneao.project.domain.PjTaskFile">
+        select pj_task_file.*
+        from pj_task
+                 join pj_task_stages on pj_task_stages.id = pj_task.pj_task_stages_id
+                 join pj_project on pj_task_stages.pj_project_id = pj_project.id
+                 join pj_task_file on pj_task.id = pj_task_file.pj_task_id
+        where pj_project.id = #{projectId}
+          and pj_task_file.is_delete = 0;
+    </select>
+    <select id="getFileList" resultType="cn.oneao.project.domain.PjTaskFile">
+        select *, pj_task.name as taskName
+        from pj_task_file
+        join pj_task on pj_task_file.pj_task_id = pj_task.id
+        join pj_task_stages on pj_task.pj_task_stages_id = pj_task_stages.id
+        join pj_project on pj_task_stages.pj_project_id = pj_project.id
+        where pj_task_file.is_delete = 0 and
+        <if test="seProjectIds != null and seProjectIds.size() > 0">
+            pj_project.id in
+            <foreach collection="seProjectIds" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+            and
+        </if>
+        <if test="pjProjectId != null">
+            pj_project.id = #{pjProjectId} AND
+        </if>
+        <if test="pjTaskId != null">
+            pj_task.id = #{pjTaskId} AND
+        </if>
+        <if test="fileName != null and fileName != ''">
+            pj_task_file.file_name like concat('%',#{fileName},'%') AND
+        </if>
+        <if test="fileSuffix != null and fileSuffix != ''">
+            pj_task_file.file_suffix = #{fileSuffix} AND
+        </if>
+        1=1
+        limit #{start}, #{end}
+    </select>
+
+    <select id="getFileListCount" resultType="java.lang.Long">
+        select count(1)
+        from pj_task_file
+        join pj_task on pj_task_file.pj_task_id = pj_task.id
+        join pj_task_stages on pj_task.pj_task_stages_id = pj_task_stages.id
+        join pj_project on pj_task_stages.pj_project_id = pj_project.id
+        where  pj_task_file.is_delete = 0 and
+        <if test="seProjectIds != null and seProjectIds.size() > 0">
+            pj_project.id in
+            <foreach collection="seProjectIds" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+            and
+        </if>
+        <if test="pjProjectId != null">
+            pj_project.id = #{pjProjectId} AND
+        </if>
+        <if test="pjTaskId != null">
+            pj_task.id = #{pjTaskId} AND
+        </if>
+        <if test="fileName != null and fileName != ''">
+            file_name like concat('%',#{fileName},'%') AND
+        </if>
+        <if test="fileSuffix != null and fileSuffix != ''">
+            file_suffix = #{fileSuffix} AND
+        </if>
+        1=1
+        limit #{start}, #{end}
+    </select>
+    <select id="getRecycleFile" resultType="cn.oneao.project.domain.PjTaskFile">
+        select *, pj_task.name as taskName
+        from pj_task_file
+        join pj_task on pj_task_file.pj_task_id = pj_task.id
+        join pj_task_stages on pj_task.pj_task_stages_id = pj_task_stages.id
+        join pj_project on pj_task_stages.pj_project_id = pj_project.id
+        where pj_task_file.is_delete = 1
+        <if test="seProjectIds != null and seProjectIds.size() > 0">
+            and pj_project.id in
+            <foreach collection="seProjectIds" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+        <if test="pjProjectId != null">
+            and pj_project.id = #{pjProjectId}
+        </if>
+        <if test="fileName != null and fileName != ''">
+            and file_name like concat('%',#{fileName},'%')
+        </if>
+        <if test="fileSuffix != null and fileSuffix != ''">
+            and file_suffix = #{fileSuffix}
+        </if>
+        <if test="startTime != null ">
+            and update_time &gt;= #{startTime}
+        </if>
+        <if test="endTime != null">
+            and update_time &lt;= #{endTime}
+        </if>
+        limit #{start},#{end}
+    </select>
+    <select id="getRecycleFileCount" resultType="java.lang.Long">
+        select count(1)
+        from pj_task_file
+        join pj_task on pj_task_file.pj_task_id = pj_task.id
+        join pj_task_stages on pj_task.pj_task_stages_id = pj_task_stages.id
+        join pj_project on pj_task_stages.pj_project_id = pj_project.id
+        where pj_task_file.is_delete = 1
+        <if test="seProjectIds != null and seProjectIds.size() > 0">
+            and pj_project.id in
+            <foreach collection="seProjectIds" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+        <if test="pjProjectId != null">
+            and pj_project.id = #{pjProjectId}
+        </if>
+        <if test="fileName != null and fileName != ''">
+            and file_name like concat('%',#{fileName},'%')
+        </if>
+        <if test="fileSuffix != null and fileSuffix != ''">
+            and file_suffix = #{fileSuffix}
+        </if>
+        <if test="startTime != null">
+            and update_time &gt;= #{startTime}
+        </if>
+        <if test="endTime != null">
+            and update_time &lt;= #{endTime}
+        </if>
+    </select>
+</mapper>

@@ -50,6 +50,7 @@ public interface ISysUserService
      */
     public SysUser selectUserById(Long userId);
 
+
     /**
      * 根据用户ID查询用户所属角色组
      * 
@@ -203,4 +204,11 @@ public interface ISysUserService
      * @return 结果
      */
     public String importUser(List<SysUser> userList, Boolean isUpdateSupport, String operName);
+
+    /**
+     * 根据岗位code查询用户列表
+     * @param postCode 岗位code
+     * @return 用户列表
+     */
+    List<SysUser> selectUserByPostCode(String postCode);
 }

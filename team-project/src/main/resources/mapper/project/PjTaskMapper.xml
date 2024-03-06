@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.oneao.project.mapper.PjTaskMapper">
+    <update id="recoverTask">
+        update pj_task
+        set is_delete = 0
+        where id = #{id};
+    </update>
+
+    <!--查找回收站的任务-->
+    <select id="getTaskRecycle" resultType="cn.oneao.project.domain.vo.task.PjTaskRecycleVO">
+        select pt.id as id, pt.name as name, pt.description as description, pt.update_time as deleteTime
+        from pj_task as pt
+                 join pj_task_stages as pts on pt.pj_task_stages_id = pts.id
+                 join pj_project as pp on pts.pj_project_id = pp.id
+        where pp.id = #{projectId}
+          and pt.is_delete = 1
+          and pt.parent_id is null;
+    </select>
+    <!--  根据任务id获取任务  -->
+    <select id="getTaskById" resultType="cn.oneao.project.domain.PjTask">
+        select *
+        from pj_task
+        where id = #{id}
+          and is_delete = 1;
+    </select>
+    <select id="getFileRecycle" resultType="cn.oneao.project.domain.vo.task.PjTaskFileVO">
+        select pj_task_file.id          as id,
+               pj_task.name             as taskName,
+               pj_task_file.file_name   as fileName,
+               pj_task_file.file_size   as fileSize,
+               pj_task_file.update_time as deleteTime
+        from pj_task
+                 join pj_task_stages on pj_task_stages.id = pj_task.pj_task_stages_id
+                 join pj_project on pj_task_stages.pj_project_id = pj_project.id
+                 join pj_task_file on pj_task.id = pj_task_file.pj_task_id
+        where pj_project.id = #{projectId}
+          and pj_task_file.is_delete = 1
+    </select>
+    <select id="selectPjTaskListByProjectId" resultType="cn.oneao.project.domain.PjTask">
+        select pj_task.*
+        from pj_project
+                 join pj_task_stages on pj_project.id = pj_task_stages.pj_project_id
+                 join pj_task on pj_task_stages.id = pj_task.pj_task_stages_id
+        where pj_project.id = #{id}
+          and pj_task.parent_id is null
+          and pj_task.is_delete = 0
+    </select>
+
+    <!--  彻底删除任务  -->
+    <delete id="realDeleteTaskById">
+        delete
+        from pj_task
+        where id = #{id}
+          and is_delete = 1;
+    </delete>
+    <!--  彻底删除任务  -->
+    <delete id="realDeleteByTaskStageIds">
+        delete from pj_task where pj_task_stages_id in
+        <foreach collection="pjTaskStageIds" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </delete>
+    <!--        查询所有任务-->
+    <select id="getTaskList" resultType="cn.oneao.project.domain.PjTask">
+        select t.*, pt.name as parentName,pp.id as pjProjectId,pp.name as pjProjectName
+        from pj_task t
+        left join pj_task pt on t.parent_id = pt.id
+        join pj_task_stages pts on t.pj_task_stages_id = pts.id
+        join pj_project pp on pts.pj_project_id = pp.id
+        where t.is_delete = 0 and
+        <if test="seProjectIds != null and seProjectIds.size() > 0">
+            pp.id in
+            <foreach collection="seProjectIds" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+            and
+        </if>
+        <if test="pjProjectId != null">
+            pp.id = #{pjProjectId} and
+        </if>
+        <if test="name != null and name != ''">
+            t.name like concat('%',#{name},'%') and
+        </if>
+        <if test="status != null">
+            t.status = #{status} and
+        </if>
+        <if test="urgency != null">
+            t.urgency = #{urgency} and
+        </if>
+        <if test="projectUserId != null ">
+            t.project_user_id = #{projectUserId} and
+        </if>
+        1 = 1
+        order by t.sort_num asc
+        limit #{start}, #{end}
+    </select>
+    <select id="getTaskListCount" resultType="java.lang.Long">
+        select count(1)
+        from pj_task t
+        left join pj_task pt on t.parent_id = pt.id
+        join pj_task_stages pts on t.pj_task_stages_id = pts.id
+        join pj_project pp on pts.pj_project_id = pp.id
+        where t.is_delete = 0 and
+        <if test="seProjectIds != null and seProjectIds.size() > 0">
+            pp.id in
+            <foreach collection="seProjectIds" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+            and
+        </if>
+        <if test="pjProjectId != null">
+            pp.id = #{pjProjectId} and
+        </if>
+        <if test="name != null and name != ''">
+            t.name like concat('%',#{name},'%') and
+        </if>
+        <if test="status != null">
+            t.status = #{status} and
+        </if>
+        <if test="urgency != null">
+            t.urgency = #{urgency} and
+        </if>
+        <if test="projectUserId != null ">
+            t.project_user_id = #{projectUserId} and
+        </if>
+        1 = 1
+        order by t.sort_num asc
+        limit #{start}, #{end}
+    </select>
+    <!--    获取回收站任务-->
+    <select id="getRecycleTask" resultType="cn.oneao.project.domain.PjTask">
+        select pt.*,ptt.name as parentName,pp.name as pjProjectName
+        from pj_task as pt
+        left join pj_task ptt on pt.parent_id = ptt.id
+        join pj_task_stages as pts on pt.pj_task_stages_id = pts.id
+        join pj_project as pp on pts.pj_project_id = pp.id
+        where pt.is_delete = 1
+        <if test="seProjectIds != null and seProjectIds.size() > 0">
+            and pp.id in
+            <foreach collection="seProjectIds" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+        <if test="pjProjectId != null ">
+            and pp.id = #{projectId}
+        </if>
+        <if test="name != null and name != ''">
+            and pt.name like concat('%',#{name},'%')
+        </if>
+        <if test="startTime != null">
+            and pt.updateTime &gt;= #{startTime}
+        </if>
+        <if test="endTime!= null">
+            and pt.updateTime &lt;= #{endTime}
+        </if>
+        limit #{start}, #{end}
+    </select>
+    <select id="getAllRecycleTaskCount" resultType="java.lang.Long">
+        select count(1)
+        from pj_task as pt
+        join pj_task_stages as pts on pt.pj_task_stages_id = pts.id
+        join pj_project as pp on pts.pj_project_id = pp.id
+        where pt.is_delete = 1
+        <if test="seProjectIds != null and seProjectIds.size() > 0">
+            and pp.id in
+            <foreach collection="seProjectIds" item="item" open="(" close=")" separator=",">
+                #{item}
+            </foreach>
+        </if>
+        <if test="pjProjectId != null ">
+            and pp.id = #{projectId}
+        </if>
+        <if test="name != null and name != ''">
+            and pt.name like concat('%',#{name},'%')
+        </if>
+        <if test="startTime!=null">
+            and pt.updateTime &gt;= #{startTime}
+        </if>
+        <if test="endTime!=null">
+            and pt.updateTime &lt;= #{endTime}
+        </if>
+    </select>
+    <select id="selectTaskById" resultType="cn.oneao.project.domain.PjTask">
+        select *
+        from pj_task
+        where id = #{id};
+    </select>
+</mapper>

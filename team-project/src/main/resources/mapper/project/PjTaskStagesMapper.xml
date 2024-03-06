@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.oneao.project.mapper.PjTaskStagesMapper">
+    <!-- 定义批量插入操作 -->
+    <insert id="insertBatch" parameterType="java.util.List">
+        INSERT INTO pj_task_stages (pj_project_id, name, sort_num, create_by, create_time)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.pjProjectId}, #{item.name}, #{item.sortNum}, #{item.createBy}, #{item.createTime})
+        </foreach>
+    </insert>
+    <delete id="realDeleteByProjectIds">
+        delete from pj_task_stages where pj_project_id in
+        <foreach collection="ids" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </delete>
+    <select id="selectCountByName" resultType="java.lang.Integer">
+        select count(1) from pj_task_stages where name = #{taskStageName} and pj_project_id = #{pjProjectId}
+    </select>
+</mapper>

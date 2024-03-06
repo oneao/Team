@@ -6,7 +6,7 @@
 
     <div class="right-menu">
       <template v-if="appStore.device !== 'mobile'">
-        <header-search id="header-search" class="right-menu-item" />
+<!--        <header-search id="header-search" class="right-menu-item" />-->
 
         <el-tooltip content="源码地址" effect="dark" placement="bottom">
           <ruo-yi-git id="ruoyi-git" class="right-menu-item hover-effect" />
@@ -140,19 +140,17 @@ function setLayout() {
     height: 100%;
     line-height: 50px;
     display: flex;
-
     &:focus {
       outline: none;
     }
 
     .right-menu-item {
       display: inline-block;
-      padding: 0 8px;
+      padding: 18px 8px;
       height: 100%;
       font-size: 18px;
       color: #5a5e66;
       vertical-align: text-bottom;
-
       &.hover-effect {
         cursor: pointer;
         transition: background 0.3s;
@@ -175,6 +173,7 @@ function setLayout() {
           width: 40px;
           height: 40px;
           border-radius: 10px;
+          margin-top: -14px;
         }
 
         i {

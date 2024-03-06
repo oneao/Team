@@ -3,6 +3,9 @@ package cn.oneao.common.core.domain.entity;
 import java.util.Date;
 import java.util.List;
 import javax.validation.constraints.*;
+
+import cn.oneao.common.utils.PageUtils;
+import com.baomidou.mybatisplus.annotation.TableField;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import cn.oneao.common.annotation.Excel;
@@ -88,7 +91,8 @@ public class SysUser extends BaseEntity
 
     /** 角色ID */
     private Long roleId;
-
+    @TableField(exist = false)
+    private Long postId;
     public SysUser()
     {
 
@@ -97,6 +101,14 @@ public class SysUser extends BaseEntity
     public SysUser(Long userId)
     {
         this.userId = userId;
+    }
+
+    public Long getPostId() {
+        return postId;
+    }
+
+    public void setPostId(Long postId) {
+        this.postId = postId;
     }
 
     public Long getUserId()

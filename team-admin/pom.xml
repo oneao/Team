@@ -61,6 +61,11 @@
             <artifactId>team-generator</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>cn.oneao</groupId>
+            <artifactId>team-project</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>

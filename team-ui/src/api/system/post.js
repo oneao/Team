@@ -42,3 +42,10 @@ export function delPost(postId) {
     method: 'delete'
   })
 }
+// 获取所有岗位列表
+export function getPostOptionSelect() {
+  return request({
+    url: '/system/post/optionselect',
+    method: 'get'
+  })
+}
